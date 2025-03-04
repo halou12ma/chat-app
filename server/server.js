@@ -14,31 +14,28 @@ app.get("/", (req, res) => {
   res.send("Server is running! 🚀");
 });
 
-// إعداد WebSocket باستخدام socket.io
-const io = new Server(server, {
-  cors: {
-    origin: "*", // السماح لجميع النطاقات بالاتصال
-    methods: ["GET", "POST"],
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-
-  socket.on("sendMessage", (message) => {
-    io.emit("receiveMessage", message); // إرسال الرسالة إلى جميع المستخدمين
+// التأكد من أن السيرفر لا يعمل بالفعل قبل تشغيله
+if (!server.listening) {
+  const io = new Server(server, {
+    cors: {
+      origin: "*", // السماح لجميع النطاقات بالاتصال
+      methods: ["GET", "POST"],
+    },
   });
 
-  socket.on("disconnect", () => {
-    console.log("A user disconnected:", socket.id);
+  io.on("connection", (socket) => {
+    console.log("A user connected:", socket.id);
+
+    socket.on("sendMessage", (message) => {
+      io.emit("receiveMessage", message); // إرسال الرسالة إلى جميع المستخدمين
+    });
+
+    socket.on("disconnect", () => {
+      console.log("A user disconnected:", socket.id);
+    });
   });
-});
 
-// تشغيل السيرفر على المنفذ المحدد
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+  server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
