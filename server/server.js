@@ -11,32 +11,33 @@ const PORT = process.env.PORT || 3001; // استخدام المنفذ الذي �
 app.use(cors());
 
 // تقديم الملفات الثابتة من مجلد dist
-app.use(express.static(path.join(__dirname, "../client/dist")));
+const clientPath = path.join(__dirname, "../client/dist");
+app.use(express.static(clientPath));
 
 // إعادة توجيه أي طلب غير معروف إلى index.html
 app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+    res.sendFile(path.join(clientPath, "index.html"));
 });
 
 const io = new Server(server, {
-  cors: {
-    origin: "*", // السماح لجميع النطاقات بالاتصال
-    methods: ["GET", "POST"],
-  },
+    cors: {
+        origin: "*", // السماح لجميع النطاقات بالاتصال
+        methods: ["GET", "POST"],
+    },
 });
 
 io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
+    console.log("A user connected:", socket.id);
 
-  socket.on("sendMessage", (message) => {
-    io.emit("receiveMessage", message); // إرسال الرسالة إلى جميع المستخدمين
-  });
+    socket.on("sendMessage", (message) => {
+        io.emit("receiveMessage", message); // إرسال الرسالة إلى جميع المستخدمين
+    });
 
-  socket.on("disconnect", () => {
-    console.log("A user disconnected:", socket.id);
-  });
+    socket.on("disconnect", () => {
+        console.log("A user disconnected:", socket.id);
+    });
 });
 
 server.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT} 🚀`);
+    console.log(`✅ Server running on http://localhost:${PORT} 🚀`);
 });
