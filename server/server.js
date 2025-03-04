@@ -9,6 +9,12 @@ const PORT = process.env.PORT || 3001; // استخدام المنفذ الذي �
 
 app.use(cors());
 
+// إضافة مسار رئيسي لمنع خطأ "Cannot GET /"
+app.get("/", (req, res) => {
+  res.send("Server is running! 🚀");
+});
+
+// إعداد WebSocket باستخدام socket.io
 const io = new Server(server, {
   cors: {
     origin: "*", // السماح لجميع النطاقات بالاتصال
@@ -26,6 +32,11 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
   });
+});
+
+// تشغيل السيرفر على المنفذ المحدد
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
 
 server.listen(PORT, () => {
