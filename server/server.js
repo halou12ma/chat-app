@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
@@ -9,33 +10,14 @@ const PORT = process.env.PORT || 3001; // استخدام المنفذ الذي �
 
 app.use(cors());
 
-// إضافة مسار رئيسي لمنع خطأ "Cannot GET /"
-app.get("/", (req, res) => {
-  res.send("Server is running! 🚀");
+// تقديم الملفات الثابتة من مجلد dist
+app.use(express.static(path.join(__dirname, "dist")));
+
+// إعادة توجيه أي طلب غير معروف إلى index.html
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
-// التأكد من أن السيرفر لا يعمل بالفعل قبل تشغيله
-if (!server.listening) {
-  const io = new Server(server, {
-    cors: {
-      origin: "*", // السماح لجميع النطاقات بالاتصال
-      methods: ["GET", "POST"],
-    },
-  });
-
-  io.on("connection", (socket) => {
-    console.log("A user connected:", socket.id);
-
-    socket.on("sendMessage", (message) => {
-      io.emit("receiveMessage", message); // إرسال الرسالة إلى جميع المستخدمين
-    });
-
-    socket.on("disconnect", () => {
-      console.log("A user disconnected:", socket.id);
-    });
-  });
-
-  server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
-}
+const io = new Server(server, {
+  cors: {
+    origin
